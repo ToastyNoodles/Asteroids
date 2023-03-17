@@ -1,1 +1,3 @@
 # Asteroids
+
+Dependencies: raylib
