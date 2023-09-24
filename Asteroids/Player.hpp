@@ -16,6 +16,7 @@ public:
 	Vector2* GetPoints() { return points; }
 	int GetLengthOfPoints() { return sizeof(points) / sizeof(Vector2); }
 	Vector2 GetScale() { return Vector2{ scale, scale }; }
+	float GetRotation() { return rotation; }
 	bool GetHasCollided() { return hasCollided; }
 private:
 	Vector2 position;

@@ -73,7 +73,7 @@ void GameManager::DrawScreen()
 
 	if (showDebug)
 	{
-		std::string SpawnInfoText = "Spawned Projectiles: " + std::to_string(projectiles.size()) + " | Spawned Asteroids: " + std::to_string(asteroids.size()) + " | GameOverState: " + std::to_string((int)gameOver);
+		std::string SpawnInfoText = "Projectiles: " + std::to_string(projectiles.size()) + " | Asteroids: " + std::to_string(asteroids.size()) + " | GameOver: " + std::to_string((int)gameOver) + " | Player: " + std::to_string((int)player.GetPosition().x) + ", " + std::to_string((int)player.GetPosition().y);
 		DrawTextEx(font, SpawnInfoText.c_str(), Vector2{ 5, 800 - 15 }, 8, 1, WHITE);
 	}
 }
@@ -111,31 +111,33 @@ void GameManager::UpdateCollisions()
 	//asteroid - player collision check.
 	if (!player.GetHasCollided())
 	{
-		for (int playerPoint = 0; playerPoint < player.GetLengthOfPoints(); playerPoint++)
+		Vector2 asteroidPointsToWorld[7] = { 0 };
+		for (int asteroid = 0; asteroid < asteroids.size(); asteroid++)
 		{
-			for (int asteroid = 0; asteroid < asteroids.size(); asteroid++)
+			for (int asteroidPoint = 0; asteroidPoint < asteroids[asteroid]->GetLengthOfPoints(); asteroidPoint++)
 			{
-				for (int point = 0; point < asteroids[asteroid]->GetLengthOfPoints(); point++)
+				asteroidPointsToWorld[asteroid] = Vector2Add(Vector2Multiply(asteroids[asteroid]->GetPoints()[asteroidPoint], asteroids[asteroid]->GetScale()), asteroids[asteroid]->GetPosition());
+				DrawCircleV(asteroidPointsToWorld[asteroidPoint], 3.0, RED);
+				if (asteroidPoint != asteroids[asteroid]->GetLengthOfPoints() - 1)
 				{
-					if (point != asteroids[asteroid]->GetLengthOfPoints() - 1)
-					{
-						if (CheckCollisionLines(Vector2Add(Vector2Multiply(player.GetPoints()[playerPoint], player.GetScale()), player.GetPosition()), Vector2Add(Vector2Multiply(player.GetPoints()[playerPoint + 1], player.GetScale()), player.GetPosition()), Vector2Add(Vector2Multiply(asteroids[asteroid]->GetPoints()[point], asteroids[asteroid]->GetScale()), asteroids[asteroid]->GetPosition()), Vector2Add(Vector2Multiply(asteroids[asteroid]->GetPoints()[point + 1], asteroids[asteroid]->GetScale()), asteroids[asteroid]->GetPosition()), nullptr))
-						{
-							player.SetHasCollided(true);
-							asteroids[asteroid]->SetHasCollided(true);
-							gameOver = true;
-						}
-					}
-					else
-					{
-						if (CheckCollisionLines(Vector2Add(Vector2Multiply(player.GetPoints()[playerPoint], player.GetScale()), player.GetPosition()), Vector2Add(Vector2Multiply(player.GetPoints()[0], player.GetScale()), player.GetPosition()), Vector2Add(Vector2Multiply(asteroids[asteroid]->GetPoints()[point], asteroids[asteroid]->GetScale()), asteroids[asteroid]->GetPosition()), Vector2Add(Vector2Multiply(asteroids[asteroid]->GetPoints()[0], asteroids[asteroid]->GetScale()), asteroids[asteroid]->GetPosition()), nullptr))
-						{
-							player.SetHasCollided(true);
-							asteroids[asteroid]->SetHasCollided(true);
-							gameOver = true;
-						}
-					}
+					DrawLineV(asteroidPointsToWorld[asteroidPoint], asteroidPointsToWorld[asteroidPoint + 1], RED);
 				}
+				else
+				{
+					DrawLineV(asteroidPointsToWorld[asteroidPoint], asteroidPointsToWorld[0], RED);
+				}
+			}
+		}
+
+		for (int asteroid = 0; asteroid < asteroids.size(); asteroid++)
+		{
+			if (CheckCollisionPointPoly(player.GetPosition(), asteroidPointsToWorld, asteroids[asteroid]->GetLengthOfPoints()))
+			{
+				printf("collided\n");
+			}
+			else
+			{
+				printf("\n");
 			}
 		}
 	}
@@ -155,7 +157,7 @@ void GameManager::UpdateCollisions()
 			if (nextSize >= 15)
 				SpawnAsteroids(2, asteroids[asteroid]->GetPosition(), false, false, nextSize);
 
-			score += 2 * asteroids[asteroid]->GetScale().x;
+			score += 2 * (int)asteroids[asteroid]->GetScale().x;
 			asteroids.erase(asteroids.begin() + asteroid);
 		}
 	}
@@ -165,17 +167,23 @@ void GameManager::DebugDrawCollisions()
 {
 	if (!showDebug) { return; }
 
+	for (int projectile = 0; projectile < projectiles.size(); projectile++)
+	{
+		DrawLineEx(projectiles[projectile]->GetPosition(), Vector2Add(projectiles[projectile]->GetPosition(), projectiles[projectile]->GetVelocity()), 1.0f, DARKGREEN);
+	}
+
 	if (!player.GetHasCollided())
 	{
+		DrawCircleV(player.GetPosition(), 2.0f, DARKGREEN);
 		for (int point = 0; point < player.GetLengthOfPoints(); point++)
 		{
 			if (point != player.GetLengthOfPoints() - 1)
 			{
-				DrawLineEx(Vector2Add(Vector2Multiply(player.GetPoints()[point], player.GetScale()), player.GetPosition()), Vector2Add(Vector2Multiply(player.GetPoints()[point + 1], player.GetScale()), player.GetPosition()), 2.0f, GREEN);
+				DrawLineEx(Vector2Add(Vector2Multiply(player.GetPoints()[point], player.GetScale()), player.GetPosition()), Vector2Add(Vector2Multiply(player.GetPoints()[point + 1], player.GetScale()), player.GetPosition()), 2.0f, DARKGREEN);
 			}
 			else
 			{
-				DrawLineEx(Vector2Add(Vector2Multiply(player.GetPoints()[point], player.GetScale()), player.GetPosition()), Vector2Add(Vector2Multiply(player.GetPoints()[0], player.GetScale()), player.GetPosition()), 2.0f, GREEN);
+				DrawLineEx(Vector2Add(Vector2Multiply(player.GetPoints()[point], player.GetScale()), player.GetPosition()), Vector2Add(Vector2Multiply(player.GetPoints()[0], player.GetScale()), player.GetPosition()), 2.0f, DARKGREEN);
 			}
 		}
 	}
@@ -188,11 +196,11 @@ void GameManager::DebugDrawCollisions()
 			{
 				if (point != asteroids[asteroid]->GetLengthOfPoints() - 1)
 				{
-					DrawLineEx(Vector2Add(Vector2Multiply(asteroids[asteroid]->GetPoints()[point], asteroids[asteroid]->GetScale()), asteroids[asteroid]->GetPosition()), Vector2Add(Vector2Multiply(asteroids[asteroid]->GetPoints()[point + 1], asteroids[asteroid]->GetScale()), asteroids[asteroid]->GetPosition()), 2.0f, PURPLE);
+					DrawLineEx(Vector2Add(Vector2Multiply(asteroids[asteroid]->GetPoints()[point], asteroids[asteroid]->GetScale()), asteroids[asteroid]->GetPosition()), Vector2Add(Vector2Multiply(asteroids[asteroid]->GetPoints()[point + 1], asteroids[asteroid]->GetScale()), asteroids[asteroid]->GetPosition()), 2.0f, DARKGREEN);
 				}
 				else
 				{
-					DrawLineEx(Vector2Add(Vector2Multiply(asteroids[asteroid]->GetPoints()[point], asteroids[asteroid]->GetScale()), asteroids[asteroid]->GetPosition()), Vector2Add(Vector2Multiply(asteroids[asteroid]->GetPoints()[0], asteroids[asteroid]->GetScale()), asteroids[asteroid]->GetPosition()), 2.0f, PURPLE);
+					DrawLineEx(Vector2Add(Vector2Multiply(asteroids[asteroid]->GetPoints()[point], asteroids[asteroid]->GetScale()), asteroids[asteroid]->GetPosition()), Vector2Add(Vector2Multiply(asteroids[asteroid]->GetPoints()[0], asteroids[asteroid]->GetScale()), asteroids[asteroid]->GetPosition()), 2.0f, DARKGREEN);
 				}
 			}
 		}
