@@ -119,14 +119,12 @@ void GameManager::UpdateCollisions()
 				asteroidVertexToWorld[asteroidPoint] = Vector2Add(Vector2Multiply(asteroids[asteroid]->GetPoints()[asteroidPoint], asteroids[asteroid]->GetScale()), asteroids[asteroid]->GetPosition());
 			}
 
-			//CheckCollisionPointPoly works 100% of the time when the position is in the poly but sometimes detects the point outside the poly.
+			//CheckCollisionPointPoly works 110% of the time. If the point is in the poly its detected if the point is out of the poly it sometimes gets detected
 			if (CheckCollisionPointPoly(player.GetPosition(), asteroidVertexToWorld, sizeof(asteroidVertexToWorld) / sizeof(Vector2)))
 			{
-				printf("collided\n");
-			}
-			else
-			{
-				printf("\n");
+				player.SetHasCollided(true);
+				asteroids[asteroid]->SetHasCollided(true);
+				gameOver = true;
 			}
 		}
 	}
