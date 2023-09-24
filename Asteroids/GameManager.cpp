@@ -15,10 +15,14 @@ void GameManager::StartGame()
 
 void GameManager::UpdateGame()
 {
-	if (IsKeyPressed(KEY_SPACE))
+	if (!gameOver)
 	{
-		projectiles.push_back(new Projectile(player.GetPosition(), player.GetForward()));
+		if (IsKeyPressed(KEY_SPACE))
+		{
+			projectiles.push_back(new Projectile(player.GetPosition(), player.GetForward()));
+		}
 	}
+	
 	if (IsKeyPressed(KEY_R))
 	{
 		ReloadGame();
