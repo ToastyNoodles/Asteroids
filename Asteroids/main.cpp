@@ -27,6 +27,7 @@ int main()
 		BeginMode2D(camera);
 
 		game.DrawGame();
+		game.DebugDrawCollisions();
 		game.UpdateCollisions();
 
 		EndMode2D();

@@ -12,6 +12,7 @@ public:
 	void UpdateCollisions();
 	void DrawGame();
 	void DrawScreen();
+	void DebugDrawCollisions();
 
 	void SetScore(int score) { score = score; }
 	int GetScore() { return score; }

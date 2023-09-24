@@ -9,6 +9,7 @@ void Player::SpawnPlayer()
 	speed = 2.0f;
 	friction = 0.3f;
 	scale = 50.0f;
+	hasCollided = false;
 }
 
 void Player::UpdatePlayer()
@@ -37,17 +38,20 @@ void Player::DrawPlayer()
 
 void Player::PlayerInput()
 {
-	if (IsKeyDown(KEY_A) || IsKeyDown(KEY_LEFT))
+	if (!hasCollided)
 	{
-		rotation -= 1.0f;
-	}
-	if (IsKeyDown(KEY_D) || IsKeyDown(KEY_RIGHT))
-	{
-		rotation += 1.0f;
-	}
-	if (IsKeyDown(KEY_W) || IsKeyDown(KEY_UP))
-	{
-		velocity.x += forward.x * (GetFrameTime() * speed);
-		velocity.y += forward.y * (GetFrameTime() * speed);
+		if (IsKeyDown(KEY_A) || IsKeyDown(KEY_LEFT))
+		{
+			rotation -= 1.0f;
+		}
+		if (IsKeyDown(KEY_D) || IsKeyDown(KEY_RIGHT))
+		{
+			rotation += 1.0f;
+		}
+		if (IsKeyDown(KEY_W) || IsKeyDown(KEY_UP))
+		{
+			velocity.x += forward.x * (GetFrameTime() * speed);
+			velocity.y += forward.y * (GetFrameTime() * speed);
+		}
 	}
 }

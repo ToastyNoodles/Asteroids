@@ -1,12 +1,19 @@
 #include "GameManager.hpp"
 #include <string>
 
+bool haveAssetsBeenLoaded = false;
+bool showDebug;
+
 void GameManager::StartGame()
 {
-	font = LoadFont("res/PressStart2P.ttf");
-	player.SpawnPlayer();
+	if (!haveAssetsBeenLoaded)
+	{
+		font = LoadFont("res/PressStart2P.ttf");
+		haveAssetsBeenLoaded = true;
+	}
 
-	SpawnAsteroids(6, Vector2{ 0.0f, 0.0f }, true, true, 0.0f);
+	player.SpawnPlayer();
+	SpawnAsteroids(6, Vector2{ 400.0f, 400.0f }, true, true, 0.0f);
 }
 
 void GameManager::UpdateGame()
@@ -18,6 +25,10 @@ void GameManager::UpdateGame()
 	if (IsKeyPressed(KEY_R))
 	{
 		ReloadGame();
+	}
+	if (IsKeyPressed(KEY_I))
+	{
+		showDebug = !showDebug;
 	}
 
 	player.UpdatePlayer();
@@ -57,12 +68,16 @@ void GameManager::DrawScreen()
 	std::string ScoreText = "Score: " + std::to_string(score);
 	DrawTextEx(font, ScoreText.c_str(), Vector2{ 400.0f - MeasureText(ScoreText.c_str(), 20), 15 }, 20, 1, WHITE);
 
-	/*std::string SpawnInfoText = "Spawned Projectiles: " + std::to_string(projectiles.size()) + " | Spawned Asteroids: " + std::to_string(asteroids.size()) + " | R - Reload Game";
-	DrawTextEx(font, SpawnInfoText.c_str(), Vector2{ 5, 800 - 15 }, 8, 1, WHITE);*/
+	if (showDebug)
+	{
+		std::string SpawnInfoText = "Spawned Projectiles: " + std::to_string(projectiles.size()) + " | Spawned Asteroids: " + std::to_string(asteroids.size()) + " | R - Reload Game";
+		DrawTextEx(font, SpawnInfoText.c_str(), Vector2{ 5, 800 - 15 }, 8, 1, WHITE);
+	}
 }
 
 void GameManager::UpdateCollisions()
 {
+	//asteroid - projectile collision check.
 	for (int projectile = 0; projectile < projectiles.size(); projectile++)
 	{
 		if (projectiles[projectile]->GetHasCollided()) { continue; }
@@ -90,6 +105,15 @@ void GameManager::UpdateCollisions()
 		}
 	}
 
+	//asteroid - player collision check.
+	if (!player.GetHasCollided())
+	{
+		for (int point = 0; point < player.GetLengthOfPoints(); point++)
+		{
+			
+		}
+	}
+
 	for (int projectile = 0; projectile < projectiles.size(); projectile++)
 	{
 		if (projectiles[projectile]->GetHasCollided()) 
@@ -103,10 +127,48 @@ void GameManager::UpdateCollisions()
 		{ 
 			float nextSize = asteroids[asteroid]->GetScale().x / 2.0f;
 			if (nextSize >= 15)
-				SpawnAsteroids(3, asteroids[asteroid]->GetPosition(), false, false, nextSize);
+				SpawnAsteroids(2, asteroids[asteroid]->GetPosition(), false, false, nextSize);
 
-			score += 100;
+			score += 2 * asteroids[asteroid]->GetScale().x;
 			asteroids.erase(asteroids.begin() + asteroid);
+		}
+	}
+}
+
+void GameManager::DebugDrawCollisions()
+{
+	if (!showDebug) { return; }
+
+	if (!player.GetHasCollided())
+	{
+		for (int point = 0; point < player.GetLengthOfPoints(); point++)
+		{
+			if (point != player.GetLengthOfPoints() - 1)
+			{
+				DrawLineEx(Vector2Add(Vector2Multiply(player.GetPoints()[point], player.GetScale()), player.GetPosition()), Vector2Add(Vector2Multiply(player.GetPoints()[point + 1], player.GetScale()), player.GetPosition()), 2.0f, GREEN);
+			}
+			else
+			{
+				DrawLineEx(Vector2Add(Vector2Multiply(player.GetPoints()[point], player.GetScale()), player.GetPosition()), Vector2Add(Vector2Multiply(player.GetPoints()[0], player.GetScale()), player.GetPosition()), 2.0f, GREEN);
+			}
+		}
+	}
+
+	for (int asteroid = 0; asteroid < asteroids.size(); asteroid++)
+	{
+		if (!asteroids[asteroid]->GetHasCollided())
+		{
+			for (int point = 0; point < asteroids[asteroid]->GetLengthOfPoints(); point++)
+			{
+				if (point != asteroids[asteroid]->GetLengthOfPoints() - 1)
+				{
+					DrawLineEx(Vector2Add(Vector2Multiply(asteroids[asteroid]->GetPoints()[point], asteroids[asteroid]->GetScale()), asteroids[asteroid]->GetPosition()), Vector2Add(Vector2Multiply(asteroids[asteroid]->GetPoints()[point + 1], asteroids[asteroid]->GetScale()), asteroids[asteroid]->GetPosition()), 2.0f, PURPLE);
+				}
+				else
+				{
+					DrawLineEx(Vector2Add(Vector2Multiply(asteroids[asteroid]->GetPoints()[point], asteroids[asteroid]->GetScale()), asteroids[asteroid]->GetPosition()), Vector2Add(Vector2Multiply(asteroids[asteroid]->GetPoints()[0], asteroids[asteroid]->GetScale()), asteroids[asteroid]->GetPosition()), 2.0f, PURPLE);
+				}
+			}
 		}
 	}
 }

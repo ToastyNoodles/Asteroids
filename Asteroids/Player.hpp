@@ -10,8 +10,13 @@ public:
 	void UpdatePlayer();
 	void DrawPlayer();
 
+	void SetHasCollided(bool value) { hasCollided = value; }
 	Vector2 GetPosition() { return position; }
 	Vector2 GetForward() { return forward; }
+	Vector2* GetPoints() { return points; }
+	int GetLengthOfPoints() { return sizeof(points) / sizeof(Vector2); }
+	Vector2 GetScale() { return Vector2{ scale, scale }; }
+	bool GetHasCollided() { return hasCollided; }
 private:
 	Vector2 position;
 	Vector2 velocity;
@@ -20,6 +25,7 @@ private:
 	float speed;
 	float friction;
 	float scale;
+	bool hasCollided;
 
 	Vector2 points[3] =
 	{

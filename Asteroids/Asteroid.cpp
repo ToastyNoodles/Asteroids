@@ -4,13 +4,14 @@ Asteroid::Asteroid(Vector2 spawnPosition, bool spawnRandom, bool randomSize, flo
 {
 	position = (!spawnRandom) ? spawnPosition : Vector2{ (float)GetRandomValue(-400, 400), (float)GetRandomValue(-400, 400) };
 	rotation = (float)GetRandomValue(0, 360);
-	speed = (float)(rand()) / (float)(RAND_MAX) + 0.2f;
+	speed = (float)(rand()) / (float)(RAND_MAX)+0.2f;
 	forward = Vector2{ (float)cos(DEG2RAD * rotation), (float)sin(DEG2RAD * rotation) };
 	velocity.x = forward.x * speed;
 	velocity.y = forward.y * speed;
-	scale = (!randomSize) ? size : (int)GetRandomValue(35, 70);
+	scale = (!randomSize) ? size : (int)GetRandomValue(30, 60);
 	hasCollided = false;
-
+}
+	
 void Asteroid::UpdateAsteroid()
 {
 	position.x += velocity.x;

@@ -3,7 +3,7 @@
 Projectile::Projectile(Vector2 spawnPosition, Vector2 direction)
 {
 	speed = 10.0f;
-	lifeTime = 0.5f;
+	lifeTime = 0.25f;
 	position = Vector2Add(spawnPosition, Vector2Multiply(direction, Vector2{ 28.0f, 28.0f }));
 	velocity.x = direction.x * speed;
 	velocity.y = direction.y * speed;
@@ -27,5 +27,5 @@ void Projectile::UpdateProjectile()
 void Projectile::DrawProjectile()
 {
 	DrawCircle((int)position.x, (int)position.y, 1.0f, WHITE);
-	//DrawLineEx(position, Vector2Add(position, velocity), 1.0f, RED);
+	//DrawLineEx(position, Vector2Add(position, velocity), 1.0f, RED); //Debug
 }
