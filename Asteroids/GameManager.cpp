@@ -17,14 +17,11 @@ void GameManager::UpdateGame()
 {
 	if (IsKeyPressed(KEY_SPACE))
 	{
-		if (gameOver)
-		{
-			ReloadGame();
-		}
-		else
-		{
-			projectiles.push_back(new Projectile(player.GetPosition(), player.GetForward()));
-		}
+		projectiles.push_back(new Projectile(player.GetPosition(), player.GetForward()));
+	}
+	if (IsKeyPressed(KEY_R))
+	{
+		ReloadGame();
 	}
 	if (IsKeyPressed(KEY_I))
 	{
