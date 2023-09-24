@@ -19,6 +19,9 @@ public:
 private:
 	Font font;
 	int score = 0;
+	bool showDebug = false;
+	bool haveAssetsBeenLoaded = false;
+	bool gameOver = false;
 
 	Player player;
 	std::vector<Projectile*> projectiles;

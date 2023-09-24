@@ -1,9 +1,6 @@
 #include "GameManager.hpp"
 #include <string>
 
-bool haveAssetsBeenLoaded = false;
-bool showDebug;
-
 void GameManager::StartGame()
 {
 	if (!haveAssetsBeenLoaded)
@@ -20,11 +17,14 @@ void GameManager::UpdateGame()
 {
 	if (IsKeyPressed(KEY_SPACE))
 	{
-		projectiles.push_back(new Projectile(player.GetPosition(), player.GetForward()));
-	}
-	if (IsKeyPressed(KEY_R))
-	{
-		ReloadGame();
+		if (gameOver)
+		{
+			ReloadGame();
+		}
+		else
+		{
+			projectiles.push_back(new Projectile(player.GetPosition(), player.GetForward()));
+		}
 	}
 	if (IsKeyPressed(KEY_I))
 	{
@@ -68,9 +68,15 @@ void GameManager::DrawScreen()
 	std::string ScoreText = "Score: " + std::to_string(score);
 	DrawTextEx(font, ScoreText.c_str(), Vector2{ 400.0f - MeasureText(ScoreText.c_str(), 20), 15 }, 20, 1, WHITE);
 
+	if (gameOver)
+	{
+		std::string GameOverText = "GAMEOVER";
+		DrawTextEx(font, GameOverText.c_str(), Vector2{ 400.0f - MeasureText(GameOverText.c_str(), 16), 400.0f }, 20, 1, WHITE);
+	}
+
 	if (showDebug)
 	{
-		std::string SpawnInfoText = "Spawned Projectiles: " + std::to_string(projectiles.size()) + " | Spawned Asteroids: " + std::to_string(asteroids.size()) + " | R - Reload Game";
+		std::string SpawnInfoText = "Spawned Projectiles: " + std::to_string(projectiles.size()) + " | Spawned Asteroids: " + std::to_string(asteroids.size()) + " | GameOverState: " + std::to_string((int)gameOver);
 		DrawTextEx(font, SpawnInfoText.c_str(), Vector2{ 5, 800 - 15 }, 8, 1, WHITE);
 	}
 }
@@ -108,9 +114,32 @@ void GameManager::UpdateCollisions()
 	//asteroid - player collision check.
 	if (!player.GetHasCollided())
 	{
-		for (int point = 0; point < player.GetLengthOfPoints(); point++)
+		for (int playerPoint = 0; playerPoint < player.GetLengthOfPoints(); playerPoint++)
 		{
-			
+			for (int asteroid = 0; asteroid < asteroids.size(); asteroid++)
+			{
+				for (int point = 0; point < asteroids[asteroid]->GetLengthOfPoints(); point++)
+				{
+					if (point != asteroids[asteroid]->GetLengthOfPoints() - 1)
+					{
+						if (CheckCollisionLines(Vector2Add(Vector2Multiply(player.GetPoints()[playerPoint], player.GetScale()), player.GetPosition()), Vector2Add(Vector2Multiply(player.GetPoints()[playerPoint + 1], player.GetScale()), player.GetPosition()), Vector2Add(Vector2Multiply(asteroids[asteroid]->GetPoints()[point], asteroids[asteroid]->GetScale()), asteroids[asteroid]->GetPosition()), Vector2Add(Vector2Multiply(asteroids[asteroid]->GetPoints()[point + 1], asteroids[asteroid]->GetScale()), asteroids[asteroid]->GetPosition()), nullptr))
+						{
+							player.SetHasCollided(true);
+							asteroids[asteroid]->SetHasCollided(true);
+							gameOver = true;
+						}
+					}
+					else
+					{
+						if (CheckCollisionLines(Vector2Add(Vector2Multiply(player.GetPoints()[playerPoint], player.GetScale()), player.GetPosition()), Vector2Add(Vector2Multiply(player.GetPoints()[0], player.GetScale()), player.GetPosition()), Vector2Add(Vector2Multiply(asteroids[asteroid]->GetPoints()[point], asteroids[asteroid]->GetScale()), asteroids[asteroid]->GetPosition()), Vector2Add(Vector2Multiply(asteroids[asteroid]->GetPoints()[0], asteroids[asteroid]->GetScale()), asteroids[asteroid]->GetPosition()), nullptr))
+						{
+							player.SetHasCollided(true);
+							asteroids[asteroid]->SetHasCollided(true);
+							gameOver = true;
+						}
+					}
+				}
+			}
 		}
 	}
 
@@ -186,5 +215,6 @@ void GameManager::ReloadGame()
 	score = 0;
 	projectiles.clear();
 	asteroids.clear();
+	gameOver = false;
 	StartGame();
 }
