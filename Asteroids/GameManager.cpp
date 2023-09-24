@@ -111,27 +111,16 @@ void GameManager::UpdateCollisions()
 	//asteroid - player collision check.
 	if (!player.GetHasCollided())
 	{
-		Vector2 asteroidPointsToWorld[7] = { 0 };
 		for (int asteroid = 0; asteroid < asteroids.size(); asteroid++)
 		{
+			Vector2 asteroidVertexToWorld[7] = { 0 };
 			for (int asteroidPoint = 0; asteroidPoint < asteroids[asteroid]->GetLengthOfPoints(); asteroidPoint++)
 			{
-				asteroidPointsToWorld[asteroid] = Vector2Add(Vector2Multiply(asteroids[asteroid]->GetPoints()[asteroidPoint], asteroids[asteroid]->GetScale()), asteroids[asteroid]->GetPosition());
-				DrawCircleV(asteroidPointsToWorld[asteroidPoint], 3.0, RED);
-				if (asteroidPoint != asteroids[asteroid]->GetLengthOfPoints() - 1)
-				{
-					DrawLineV(asteroidPointsToWorld[asteroidPoint], asteroidPointsToWorld[asteroidPoint + 1], RED);
-				}
-				else
-				{
-					DrawLineV(asteroidPointsToWorld[asteroidPoint], asteroidPointsToWorld[0], RED);
-				}
+				asteroidVertexToWorld[asteroidPoint] = Vector2Add(Vector2Multiply(asteroids[asteroid]->GetPoints()[asteroidPoint], asteroids[asteroid]->GetScale()), asteroids[asteroid]->GetPosition());
 			}
-		}
 
-		for (int asteroid = 0; asteroid < asteroids.size(); asteroid++)
-		{
-			if (CheckCollisionPointPoly(player.GetPosition(), asteroidPointsToWorld, asteroids[asteroid]->GetLengthOfPoints()))
+			//CheckCollisionPointPoly works 100% of the time when the position is in the poly but sometimes detects the point outside the poly.
+			if (CheckCollisionPointPoly(player.GetPosition(), asteroidVertexToWorld, sizeof(asteroidVertexToWorld) / sizeof(Vector2)))
 			{
 				printf("collided\n");
 			}
